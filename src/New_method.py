@@ -27,7 +27,7 @@ class Predict:
         self.NewMethod(epochs_num, data_name, look_back, switch_key)
 
         #test/train an array
-        epochs_arrays = [1,50,100,200,300,500]
+        epochs_arrays = [1,50,100,200]
         for ep in epochs_arrays:
             self.NewMethod(ep, data_name, look_back, switch_key)
 
