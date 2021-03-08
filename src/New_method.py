@@ -11,6 +11,7 @@ from keras.models import Sequential, model_from_json
 from keras.layers import LSTM, Dense
 from keras import optimizers
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 class Predict:
@@ -18,20 +19,21 @@ class Predict:
     def __init__(self):
         data_name = "PETR4_SA_1"
         look_back = 30
-        epochs_num = 1
-        switch_key = [True, False] #[train, test]
+        epochs_num = 10
+        # switch_key = [False, False]  # [train, test]
+        switch_key = [False, True]  # [train, test]
+        # switch_key = [True, False]  # [train, test]
+        # switch_key = [True, True] #[train, test]
 
         inicio = time.time()
 
         # test/train just one time
         self.NewMethod(epochs_num, data_name, look_back, switch_key)
 
-        #test/train an array
-        epochs_arrays = [1,50,100,200]
-        for ep in epochs_arrays:
-            self.NewMethod(ep, data_name, look_back, switch_key)
-
-
+        # #test/train an array
+        # epochs_arrays = [1,50,100,200]
+        # for ep in epochs_arrays:
+        #     self.NewMethod(ep, data_name, look_back, switch_key)
 
 
         fim = time.time()
@@ -80,7 +82,13 @@ class Predict:
 
         #Using TimeseriesGenerator to get the time series
         train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=20)
+        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=1)
         test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=1)
+
+        # train_generator_array = np.array(train_generator)
+        # test_generator_arraytest_generator_array = np.array(test_generator)
+        # print(close_train)
+        # print(train_generator)
 
         # --------------------------------NEURAL NETWORK--------------------------------
         if(switch_key[0] == True):
@@ -97,7 +105,7 @@ class Predict:
             #model.fit_generator(train_generator, epochs=epochs_num, verbose=2)
 
             #Saving the Neural network
-            history = model.fit(train_generator, epochs=epochs_num, verbose=1)
+            history = model.fit(train_generator, epochs=epochs_num, validation_data=valid_data_generator, verbose=1)
             # Get the dictionary containing each metric and the loss for each epoch
             history_dict = history.history
             # Save it under the form of a json file
@@ -195,33 +203,23 @@ class Predict:
             )
             fig = go.Figure(data=[trace1, trace2, trace3, trace4], layout=layout)
             fig.show()
-
+            print("Loaded figure 1")
             # --------------------------------LOSS------------------------------------
-            #history = json.load(open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'r'))
+            history = json.load(open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'r'))
 
-            # epochs_array = []
-            # for i in range(epochs_num):
-            #     epochs_array.append(i)
-            #
-            # trace_L1 = go.Scatter(
-            #     x=epochs_array,
-            #     y=history['loss'],
-            #     mode='lines',
-            #     name='Predicted Loss'
-            # )
-            # trace_L2 = go.Scatter(
-            #     x=epochs_array,
-            #     y=history['val_loss'],
-            #     mode='lines',
-            #     name='Real Loss'
-            # )
-            # layout_L = go.Layout(
-            #     title="{} Loss".format(data_name),
-            #     xaxis={'title': "epoch"},
-            #     yaxis={'title': "loss"}
-            # )
-            # fig2 = go.Figure(data=[trace_L1, trace_L2], layout=layout_L)
-            # fig2.show()
+            epochs_array = []
+            for i in range(epochs_num):
+                epochs_array.append(i)
+
+            fig2 = make_subplots(rows=1, cols=2)
+            fig2.add_trace(go.Scatter(x=epochs_array, y=history['loss']), row=1, col=1)
+            fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_loss']), row=1, col=1)
+            fig2.add_trace(go.Scatter(x=epochs_array, y=history['accuracy']), row=1, col=2)
+            fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_accuracy']), row=1, col=2)
+
+            fig2.update_layout(height=700, showlegend=False)
+            fig2.show()
+            print("Loaded figure 2")
 
 start = Predict()
 
