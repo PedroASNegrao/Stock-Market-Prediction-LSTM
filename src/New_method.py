@@ -23,8 +23,8 @@ class Predict:
 
     def __init__(self):
         data_name = "PETR4_SA_1"
-        look_back = 25
-        epochs_num = 15
+        look_back = 15
+        epochs_num = 25
         # switch_key = [False, False]  # [train, test]
         switch_key = [False, True]  # [train, test]
         # switch_key = [True, False]  # [train, test]
