@@ -19,7 +19,7 @@ class Predict:
     def __init__(self):
         data_name = "PETR4_SA_1"
         look_back = 30
-        epochs_num = 10
+        epochs_num = 100
         # switch_key = [False, False]  # [train, test]
         switch_key = [False, True]  # [train, test]
         # switch_key = [True, False]  # [train, test]
@@ -28,12 +28,16 @@ class Predict:
         inicio = time.time()
 
         # test/train just one time
-        self.NewMethod(epochs_num, data_name, look_back, switch_key)
+        # self.NewMethod(epochs_num, data_name, look_back, switch_key)
 
-        # #test/train an array
-        # epochs_arrays = [1,50,100,200]
-        # for ep in epochs_arrays:
-        #     self.NewMethod(ep, data_name, look_back, switch_key)
+        #test/train an array
+        epochs_arrays = [20, 30, 50, 100, 200, 300, 400, 500]
+        for ep in epochs_arrays:
+            if ep == 100:
+                switch_key = [False, True]
+            else:
+                switch_key = [True, True]
+            self.NewMethod(ep, data_name, look_back, switch_key)
 
 
         fim = time.time()
@@ -167,10 +171,22 @@ class Predict:
             close_data = close_data.reshape((-1))
 
             # --------------------------------PLOTING------------------------------------
-            print(len(close_test))
+            print(close_test)
+            print(prediction)
+            # rmse = "TEST"
+
+            test_array = []
+
+            for i in range(len(close_test)-30):
+                test_array.append(close_test[i])
+
+            print(len(test_array))
             print(len(prediction))
-            rmse = "TEST"
-            #rmse = mean_squared_error(close_train, prediction, squared=False)
+
+            rmse = mean_squared_error(test_array, prediction, squared=False)
+            results ="Data: {}, Epochs: {}, Look Back: {}, rmse: {}".format(data_name, epochs_num, look_back, rmse)
+            with open('./../Models/{}/results.txt'.format(data_name), 'a') as result_manager:
+                result_manager.write(results+'\n')
 
             trace1 = go.Scatter(
                 x=date_train,
@@ -203,6 +219,7 @@ class Predict:
             )
             fig = go.Figure(data=[trace1, trace2, trace3, trace4], layout=layout)
             fig.show()
+
             print("Loaded figure 1")
             # --------------------------------LOSS------------------------------------
             history = json.load(open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'r'))
@@ -211,13 +228,31 @@ class Predict:
             for i in range(epochs_num):
                 epochs_array.append(i)
 
-            fig2 = make_subplots(rows=1, cols=2)
-            fig2.add_trace(go.Scatter(x=epochs_array, y=history['loss']), row=1, col=1)
-            fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_loss']), row=1, col=1)
-            fig2.add_trace(go.Scatter(x=epochs_array, y=history['accuracy']), row=1, col=2)
-            fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_accuracy']), row=1, col=2)
+            # fig2 = make_subplots(rows=1, cols=2)
+            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['loss']), row=1, col=1)
+            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_loss']), row=1, col=1)
+            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['accuracy']), row=1, col=2)
+            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_accuracy']), row=1, col=2)
 
-            fig2.update_layout(height=700, showlegend=False)
+            traceL = go.Scatter(
+                x=epochs_array,
+                y=history['loss'],
+                mode='lines',
+                name='Predicted Loss'
+            )
+            traceL2 = go.Scatter(
+                x=epochs_array,
+                y=history['val_loss'],
+                mode='lines',
+                name='Real Loss'
+            )
+            layoutL = go.Layout(
+                title="{} - epochs: {} Stock - RMSE: {}".format(data_name, epochs_num, rmse),
+                xaxis={'title': "Date"},
+                yaxis={'title': "Close"}
+            )
+
+            fig2 = go.Figure(data=[traceL, traceL2], layout=layoutL)
             fig2.show()
             print("Loaded figure 2")
 
