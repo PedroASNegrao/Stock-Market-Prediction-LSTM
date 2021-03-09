@@ -12,14 +12,19 @@ from keras.layers import LSTM, Dense
 from keras import optimizers
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import plotly.offline
+
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
 
 
 class Predict:
 
     def __init__(self):
         data_name = "PETR4_SA_1"
-        look_back = 30
-        epochs_num = 100
+        look_back = 25
+        epochs_num = 15
         # switch_key = [False, False]  # [train, test]
         switch_key = [False, True]  # [train, test]
         # switch_key = [True, False]  # [train, test]
@@ -28,16 +33,16 @@ class Predict:
         inicio = time.time()
 
         # test/train just one time
-        # self.NewMethod(epochs_num, data_name, look_back, switch_key)
+        self.NewMethod(epochs_num, data_name, look_back, switch_key)
 
         #test/train an array
-        epochs_arrays = [20, 30, 50, 100, 200, 300, 400, 500]
-        for ep in epochs_arrays:
-            if ep == 100:
-                switch_key = [False, True]
-            else:
-                switch_key = [True, True]
-            self.NewMethod(ep, data_name, look_back, switch_key)
+        # epochs_arrays = [20, 30, 50, 100, 200, 300, 400, 500]
+        # for ep in epochs_arrays:
+        #     if ep == 100:
+        #         switch_key = [False, True]
+        #     else:
+        #         switch_key = [True, True]
+        #     self.NewMethod(ep, data_name, look_back, switch_key)
 
 
         fim = time.time()
@@ -177,7 +182,7 @@ class Predict:
 
             test_array = []
 
-            for i in range(len(close_test)-30):
+            for i in range(len(close_test)-look_back):
                 test_array.append(close_test[i])
 
             print(len(test_array))
@@ -213,12 +218,15 @@ class Predict:
                 name='Forecast'
             )
             layout = go.Layout(
-                title="{} - epochs: {} Stock - RMSE: {}".format(data_name, epochs_num, rmse),
+                title="{} - epochs: {} Stock - RMSE: {} - L.Back: {}".format(data_name, epochs_num, rmse, look_back),
                 xaxis={'title': "Date"},
                 yaxis={'title': "Close"}
             )
+
             fig = go.Figure(data=[trace1, trace2, trace3, trace4], layout=layout)
-            fig.show()
+
+
+            # fig.show()
 
             print("Loaded figure 1")
             # --------------------------------LOSS------------------------------------
@@ -251,9 +259,18 @@ class Predict:
                 xaxis={'title': "Date"},
                 yaxis={'title': "Close"}
             )
-
             fig2 = go.Figure(data=[traceL, traceL2], layout=layoutL)
-            fig2.show()
+
+            app = dash.Dash()
+            app.layout = html.Div([
+                dcc.Graph(figure=fig),
+                dcc.Graph(figure=fig2)
+            ])
+
+            app.run_server(debug=True, use_reloader=False)
+
+            #
+            # fig2.show()
             print("Loaded figure 2")
 
 start = Predict()
