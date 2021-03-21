@@ -1,0 +1,1 @@
+Data: XOM, Epochs: 25, Look Back: 15, rmse: 3.5624589985102824

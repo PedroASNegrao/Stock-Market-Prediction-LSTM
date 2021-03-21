@@ -22,11 +22,12 @@ import dash_html_components as html
 class Predict:
 
     def __init__(self):
-        data_name = "PETR4_SA_1"
+        data_name = "XOM"
+        # data_name = "PETR4_SA_1"
         look_back = 15
         epochs_num = 25
         # switch_key = [False, False]  # [train, test]
-        switch_key = [False, True]  # [train, test]
+        switch_key = [True, True]  # [train, test]
         # switch_key = [True, False]  # [train, test]
         # switch_key = [True, True] #[train, test]
 
