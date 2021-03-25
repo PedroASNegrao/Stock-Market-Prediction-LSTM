@@ -10,6 +10,7 @@ from keras.preprocessing.sequence import TimeseriesGenerator
 from keras.models import Sequential, model_from_json
 from keras.layers import LSTM, Dense
 from keras import optimizers
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.offline

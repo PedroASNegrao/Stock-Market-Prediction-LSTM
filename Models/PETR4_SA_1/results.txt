@@ -15,3 +15,6 @@ Data: PETR4_SA_1, Epochs: 200, Look Back: 30, rmse: 3.7861825256294446
 Data: PETR4_SA_1, Epochs: 25, Look Back: 15, rmse: 2.658188086748955
 Data: PETR4_SA_1, Epochs: 1, Look Back: 15, rmse: 3.269812234647138
 Data: PETR4_SA_1, Epochs: 25, Look Back: 15, rmse: 2.658188086748955
+Data: PETR4_SA_1, Epochs: 1, Look Back: 15, rmse: 3.200731193462311
+Data: PETR4_SA_1, Epochs: 1, Look Back: 15, rmse: 2.162605426508775
+Data: PETR4_SA_1, Epochs: 1, Look Back: 15, rmse: 2.8584264314573384

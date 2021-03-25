@@ -10,6 +10,7 @@ from keras.preprocessing.sequence import TimeseriesGenerator
 from keras.models import Sequential, model_from_json
 from keras.layers import LSTM, Dense
 from keras import optimizers
+import matplotlib.pyplot as plt
 
 print("Inicio")
 
@@ -20,8 +21,8 @@ class Predict:
         data_name = "PETR4_SA_1"
         look_back = 15
         epochs_num = 1
-        data_path = "/content/Stock-Market-Prediction-LSTM/Data"
-        result_path = "/content/drive/MyDrive/Neural_Network/Models"
+        data_path = "./../Data"
+        result_path = "./../Models"
 
         inicio = time.time()
 
@@ -111,7 +112,7 @@ class Predict:
         history_dict = history.history
         # Save it under the form of a json file
         json.dump(history_dict,
-                  open("{}/json/history-{}-epochs-{}-loockback-{}.json".format(result_path, data_name, epochs_num, look_back), 'w'))
+                  open("{}/{}/json/history-{}-epochs-{}-loockback-{}.json".format(result_path, data_name, data_name, epochs_num, look_back), 'w'))
         # Save model
         # serialize model to JSON
         model_json = model.to_json()
@@ -145,4 +146,17 @@ class Predict:
         with open('{}/{}/results.txt'.format(result_path, data_name), 'a') as result_manager:
             result_manager.write(results+'\n')
 
+
+        # ---------------------------Criate-Graph------------------------------
+        plt.plot(prediction)
+        plt.plot(close_test)
+        # plt.legend(['prediction', 'real'], loc='upper left')
+        plt.legend(['prediction', 'real'])
+        plt.ylabel('Stock-prices')
+        plt.title("Data: {}, Epochs: {}, Look Back: {}, rmse: {}".format(data_name, epochs_num, look_back, rmse))
+        plt.show()
+
+
+
 start = Predict()
+
