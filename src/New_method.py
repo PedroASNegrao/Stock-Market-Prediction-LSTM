@@ -27,7 +27,7 @@ class Predict:
         look_back = 15
         epochs_num = 25
         # switch_key = [False, False]  # [train, test]
-        switch_key = [True, True]  # [train, test]
+        switch_key = [False, True]  # [train, test]
         # switch_key = [True, False]  # [train, test]
         # switch_key = [True, True] #[train, test]
 
@@ -87,10 +87,10 @@ class Predict:
         date_train = df['Date'][:split]
         date_test = df['Date'][split:]
 
-        #print(len(close_train))
-        #print(len(close_test))
+        # print(len(close_train))
+        # print(len(close_test))
 
-        #Using TimeseriesGenerator to get the time series
+        # Using TimeseriesGenerator to get the time series
         train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=20)
         valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=1)
         test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=1)
@@ -112,9 +112,9 @@ class Predict:
             model.add(Dense(1))
             model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
-            #model.fit_generator(train_generator, epochs=epochs_num, verbose=2)
+            # model.fit_generator(train_generator, epochs=epochs_num, verbose=2)
 
-            #Saving the Neural network
+            # Saving the Neural network
             history = model.fit(train_generator, epochs=epochs_num, validation_data=valid_data_generator, verbose=1)
             # Get the dictionary containing each metric and the loss for each epoch
             history_dict = history.history
