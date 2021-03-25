@@ -21,12 +21,13 @@ class Predict:
         # data_name = "XOM"
         data_name = "PETR4_SA_1"
         look_back = 15
-        epochs_num = 25
-
-        # data_path = "./../Data"
-        # result_path = "./../Models"
+        epochs_num = 1
         data_path = "/content/Stock-Market-Prediction-LSTM/Data"
         result_path = "/content/drive/MyDrive/Neural_Network"
+
+        # #Para rodar localmente:
+        # data_path = "./../Data"
+        # result_path = "./../Models"
 
         inicio = time.time()
 
@@ -140,14 +141,8 @@ class Predict:
         for i in range(len(close_test) - look_back):
             test_array.append(close_test[i])
 
-        print(len(test_array))
-        print(len(prediction))
-
-        # Results.txt
+        loss_rmse = mean_squared_error(history_dict['loss'], history_dict['val_loss'], squared=False)
         rmse = mean_squared_error(test_array, prediction, squared=False)
-        results = "Data: {}, Epochs: {}, Look Back: {}, rmse: {}".format(data_name, epochs_num, look_back, rmse)
-        with open('{}/{}/results.txt'.format(result_path, data_name), 'a') as result_manager:
-            result_manager.write(results + '\n')
 
         # ---------------------------Criate-Graph------------------------------
         plt.plot(prediction)
@@ -157,6 +152,22 @@ class Predict:
         plt.ylabel('Stock-prices')
         plt.title("Data: {}, Epochs: {}, Look Back: {}, rmse: {}".format(data_name, epochs_num, look_back, rmse))
         plt.show()
+
+        # summarize history for loss
+        plt.plot(history_dict['loss'])
+        plt.plot(history_dict['val_loss'])
+        plt.title("Model loss: {}".format(loss_rmse))
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.show()
+
+        # Results.txt
+
+        results = "Data: {}, Epochs: {}, Look Back: {}, rmse: {}, Loss_rmse: {}".format(data_name, epochs_num,
+                                                                                        look_back, rmse, loss_rmse)
+        with open('{}/{}/results.txt'.format(result_path, data_name), 'a') as result_manager:
+            result_manager.write(results + '\n')
 
 
 start = Predict()
