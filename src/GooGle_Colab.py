@@ -20,11 +20,13 @@ class Predict:
         data_name = "PETR4_SA_1"
         look_back = 15
         epochs_num = 1
+        data_path = "/content/Stock-Market-Prediction-LSTM/Data"
+        result_path = "/content/drive/MyDrive/Neural_Network/Models"
 
         inicio = time.time()
 
         # test/train just one time
-        self.NewMethod(epochs_num, data_name, look_back)
+        self.NewMethod(epochs_num, data_name, look_back, result_path, data_path)
 
         #test/train an array
         # epochs_arrays = [20, 30, 50, 100, 200, 300, 400, 500]
@@ -40,10 +42,10 @@ class Predict:
         tempo_total = (fim - inicio) / 60
         print("Tempo de execução foi de: %d minutos" % tempo_total)
 
-    def NewMethod(self, epochs_num, data_name, look_back):
+    def NewMethod(self, epochs_num, data_name, look_back, result_path, data_path):
         # --------------------------------TRAINING PART--------------------------------
         print("inicio do treio")
-        df = pd.read_csv('/content/Stock-Market-Prediction-LSTM/Data/{}.csv'.format(data_name))
+        df = pd.read_csv('{}/{}.csv'.format(data_path, data_name))
         #print(df.info())
 
         # Getting only Date and Close columns
@@ -109,15 +111,15 @@ class Predict:
         history_dict = history.history
         # Save it under the form of a json file
         json.dump(history_dict,
-                  open("/content/drive/MyDrive/Neural_Network/Models/{}/json/history-{}-epochs-{}-loockback-{}.json".format(data_name, data_name, epochs_num, look_back), 'w'))
+                  open("{}/json/history-{}-epochs-{}-loockback-{}.json".format(result_path, data_name, epochs_num, look_back), 'w'))
         # Save model
         # serialize model to JSON
         model_json = model.to_json()
-        with open("/content/drive/MyDrive/Neural_Network/Models/{}/json/regressor-{}-epochs-{}-loockback-{}.json".format(data_name, data_name, epochs_num, look_back),
+        with open("{}/{}/json/regressor-{}-epochs-{}-loockback-{}.json".format(result_path, data_name, data_name, epochs_num, look_back),
                   "w") as json_file:
             json_file.write(model_json)
         # serialize weights to HDF5
-        model.save_weights("/content/drive/MyDrive/Neural_Network/Models/{}/h5/regressor-{}-epochs-{}-loockback-{}.h5".format(data_name, data_name, epochs_num, look_back))
+        model.save_weights("{}/{}/h5/regressor-{}-epochs-{}-loockback-{}.h5".format(result_path, data_name, data_name, epochs_num, look_back))
         print("Saved model to disk")
 
         print("inicio do teste")
@@ -140,7 +142,7 @@ class Predict:
         #Results.txt
         rmse = mean_squared_error(test_array, prediction, squared=False)
         results ="Data: {}, Epochs: {}, Look Back: {}, rmse: {}".format(data_name, epochs_num, look_back, rmse)
-        with open('/content/Stock-Market-Prediction-LSTM/Models/{}/results.txt'.format(data_name), 'a') as result_manager:
+        with open('{}/{}/results.txt'.format(result_path, data_name), 'a') as result_manager:
             result_manager.write(results+'\n')
 
 start = Predict()
