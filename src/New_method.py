@@ -92,9 +92,9 @@ class Predict:
         # print(len(close_test))
 
         # Using TimeseriesGenerator to get the time series
-        train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=20)
-        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=1)
-        test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=1)
+        train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
+        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
+        test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=128)
 
         # train_generator_array = np.array(train_generator)
         # test_generator_arraytest_generator_array = np.array(test_generator)
