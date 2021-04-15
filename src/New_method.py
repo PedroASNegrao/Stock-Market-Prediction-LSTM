@@ -8,7 +8,9 @@ import json
 import time
 from keras.preprocessing.sequence import TimeseriesGenerator
 from keras.models import Sequential, model_from_json
-from keras.layers import LSTM, Dense
+from keras.layers import LSTM, Dense, Dropout
+from keras.wrappers.scikit_learn import KerasRegressor
+from sklearn.model_selection import GridSearchCV
 from keras import optimizers
 
 import plotly.graph_objects as go
@@ -25,20 +27,25 @@ class Predict:
     def __init__(self):
         # data_name = "XOM"
         data_name = "PETR4_SA_1"
-        look_back = 15
-        epochs_num = 25
+        look_back = [5, 10, 15]
+        batch_size = [10, 20,32,128]
+        epochs_num = [50, 100, 200]
+        neurons = [18,32,64,128]
+        dropout = [0.0, 0.1, 0.2, 0.3]
+        activation = ['relu', 'tanh', 'linear']
+
         # switch_key = [False, False]  # [train, test]
-        switch_key = [True, True]  # [train, test]
+        switch_key = [False, False]  # [train, test]
         # switch_key = [True, False]  # [train, test]
         # switch_key = [True, True] #[train, test]
 
         inicio = time.time()
 
         # test/train just one time
-        self.NewMethod(epochs_num, data_name, look_back, switch_key)
+        self.NewMethod(epochs_num, data_name, look_back, switch_key, batch_size, dropout, neurons, activation)
 
-        #test/train an array
-        # epochs_arrays = [20, 30, 50, 100, 200, 300, 400, 500]
+        # # test/train an array
+        # epochs_arrays = [20, 30, 50, 100, 500]
         # for ep in epochs_arrays:
         #     if ep == 100:
         #         switch_key = [False, True]
@@ -51,7 +58,7 @@ class Predict:
         tempo_total = (fim - inicio) / 60
         print("Tempo de execução foi de: %d minutos" % tempo_total)
 
-    def NewMethod(self, epochs_num, data_name, look_back, switch_key):
+    def NewMethod(self, epochs_num, data_name, look_back, switch_key, batch_size, dropout, neurons, activation):
         # --------------------------------TRAINING PART--------------------------------
         print("inicio do treio")
         df = pd.read_csv('./../Data/{}.csv'.format(data_name))
@@ -88,13 +95,19 @@ class Predict:
         date_train = df['Date'][:split]
         date_test = df['Date'][split:]
 
+        split_test = 0.5
+        split = int(split_test * len(close_test))
+        close_validation = close_test[split:]
+        close_test = close_test[:split]
+
+
         # print(len(close_train))
         # print(len(close_test))
 
         # Using TimeseriesGenerator to get the time series
-        train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
-        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
-        test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=128)
+        train_generator = TimeseriesGenerator(close_train, close_train, length=15, batch_size=64)
+        valid_generator = TimeseriesGenerator(close_train, close_train, length=15, batch_size=32)
+        test_generator = TimeseriesGenerator(close_test, close_test, length=15, batch_size=64)
 
         # train_generator_array = np.array(train_generator)
         # test_generator_arraytest_generator_array = np.array(test_generator)
@@ -103,34 +116,92 @@ class Predict:
 
         # --------------------------------NEURAL NETWORK--------------------------------
         if(switch_key[0] == True):
-            model = Sequential()
-            model.add(
-                LSTM(10,
-                     # activation = 'SineReLU',
-                     activation='relu',
-                     input_shape=(look_back, 1))
-            )
-            model.add(Dense(1))
-            model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+            def create_model(neurons, dropout, look_back):
+                model = Sequential()
+                model.add(
+                    LSTM(10,
+                         # activation = 'SineReLU',
+                         activation=activation,
+                         input_shape=(look_back, 1))
+                )
+                model.add(Dense(neurons))
+                model.add(Dropout(dropout))
+                # The last layer needs to be a dense layer that returns one value
+                model.add(Dense(1))
+                model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+                return model
 
-            # model.fit_generator(train_generator, epochs=epochs_num, verbose=2)
+            model = KerasRegressor(build_fn=create_model, verbose=True)
 
-            # Saving the Neural network
-            history = model.fit(train_generator, epochs=epochs_num, validation_data=valid_data_generator, verbose=1)
-            # Get the dictionary containing each metric and the loss for each epoch
-            history_dict = history.history
-            # Save it under the form of a json file
-            json.dump(history_dict,
-                      open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'w'))
-            # Save model
-            # serialize model to JSON
-            model_json = model.to_json()
-            with open("./../Models/{}/json/regressor-{}-{}.json".format(data_name, data_name, epochs_num),
-                      "w") as json_file:
-                json_file.write(model_json)
-            # serialize weights to HDF5
-            model.save_weights("./../Models/{}/h5/regressor-{}-{}.h5".format(data_name, data_name, epochs_num))
-            print("Saved model to disk")
+            param_grid = dict(batch_size=batch_size, epochs=epochs_num, neurons=neurons, dropout=dropout, look_back=look_back)
+            grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
+            # grid_result = grid.fit(train_generator, valid_generator)
+            grid_result = grid.fit(train_generator)
+
+            print("Best: %f using %s" % (grid_result.bestscore, grid_result.bestparams))
+            means = grid_result.cvresults['mean_test_score']
+            stds = grid_result.cvresults['std_test_score']
+            params = grid_result.cvresults['params']
+            for mean, stdev, param in zip(means, stds, params):
+                print("%f (%f) with: %r" % (mean, stdev, param))
+
+
+
+            # # Saving the Neural network
+            # history = model.fit(train_generator, epochs=epochs_num, validation_data=valid_data_generator, verbose=1)
+            #
+            # # Get the dictionary containing each metric and the loss for each epoch
+            # history_dict = history.history
+
+            # # -------------------------------- Hyper-parameter tuning --------------------------------
+            # # Deep learning
+            # # define the keras model
+            # def create_model(neurons,dropout_rate):
+            #     model = Sequential()
+            #     model.add(Dense(16, input_dim=16, activation='relu',kernel_initializer='he_normal'))
+            #     model.add(Dense(neurons, activation='relu',kernel_initializer='he_normal'))
+            #     model.add(Dropout(dropout_rate))
+            #     model.add(Dense(neurons, activation='relu', kernel_initializer='he_normal'))
+            #     model.add(Dropout(dropout_rate))
+            #     model.add(Dense(neurons, activation='relu',kernel_initializer='he_normal'))
+            #     model.add(Dense(1, activation='sigmoid'))
+            #     # compile the keras model
+            #     model.compile(loss = tf.keras.losses.binary_crossentropy, optimizer = tf.keras.optimizers.Adam(), metrics = ['acc'])
+            #     return model
+            # model = KerasRegressor(build_fn=create_model, verbose=True)
+            # #
+            # batch_size = [10, 20,32,128]
+            # epochs = [50, 100, 200]
+            # neurons = [18,32,64,128]
+            # dropout_rate = [0.0, 0.1, 0.2, 0.3]
+            # activation = ['relu', 'tanh', 'linear']
+            # init_mode = ['uniform', 'normal']
+            #
+            # param_grid = dict(batch_size=batch_size, epochs=epochs, neurons = neurons, dropout_rate = dropout_rate)
+            # grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
+            # grid_result = grid.fit(x_train, y_train)
+            # #
+            # print("Best: %f using %s" % (grid_result.bestscore, grid_result.bestparams))
+            # means = grid_result.cvresults['mean_test_score']
+            # stds = grid_result.cvresults['std_test_score']
+            # params = grid_result.cvresults['params']
+            # for mean, stdev, param in zip(means, stds, params):
+            #     print("%f (%f) with: %r" % (mean, stdev, param))
+            # ############################################
+
+
+            # # Save it under the form of a json file
+            # json.dump(history_dict,
+            #           open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'w'))
+            # # Save model
+            # # serialize model to JSON
+            # model_json = model.to_json()
+            # with open("./../Models/{}/json/regressor-{}-{}.json".format(data_name, data_name, epochs_num),
+            #           "w") as json_file:
+            #     json_file.write(model_json)
+            # # serialize weights to HDF5
+            # model.save_weights("./../Models/{}/h5/regressor-{}-{}.h5".format(data_name, data_name, epochs_num))
+            # print("Saved model to disk")
 
 
         # --------------------------------TESTING PART--------------------------------
