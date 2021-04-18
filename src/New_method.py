@@ -23,21 +23,37 @@ import dash_html_components as html
 class Predict:
 
     def __init__(self):
-        # data_name = "XOM"
-        data_name = "PETR4_SA_1"
-        look_back = 15
-        epochs_num = 25
-        # switch_key = [False, False]  # [train, test]
-        switch_key = [True, True]  # [train, test]
-        # switch_key = [True, False]  # [train, test]
-        # switch_key = [True, True] #[train, test]
-
         inicio = time.time()
 
-        # test/train just one time
-        self.NewMethod(epochs_num, data_name, look_back, switch_key)
+        # data_name = "XOM"
+        data_name = "PETR4_SA_1"
+        # look_back = 15
+        # epochs_num = 50
+        # batch_size =32
+        # neurons = 20
+        # # switch_key = [False, False]  # [train, test]
+        # switch_key = [True, True]  # [train, test]
+        # # switch_key = [True, False]  # [train, test]
+        # # switch_key = [True, True] #[train, test]
 
+        # # test/train just one time
+        # self.NewMethod(epochs_num, data_name, look_back, result_path, batch_size, neurons)
+
+        
         #test/train an array
+        switch_key = [True, False]
+        look_back_array = [5, 15, 30]
+        neurons_array = [5, 10, 20, 30, 40]
+        epochs_array = [50, 100, 200, 300, 400, 500]
+        batch_size_array = [8, 16, 32, 64, 128]
+
+        for batch_size in batch_size_array:
+            for neurons in neurons_array:
+                for epochs_num in epochs_array:
+                    for look_back in look_back_array:
+                        self.NewMethod(epochs_num, data_name, look_back, switch_key, batch_size, neurons)
+
+        
         # epochs_arrays = [20, 30, 50, 100, 200, 300, 400, 500]
         # for ep in epochs_arrays:
         #     if ep == 100:
@@ -51,7 +67,8 @@ class Predict:
         tempo_total = (fim - inicio) / 60
         print("Tempo de execução foi de: %d minutos" % tempo_total)
 
-    def NewMethod(self, epochs_num, data_name, look_back, switch_key):
+    def NewMethod(self, epochs_num, data_name, look_back, switch_key, batch_size, neurons):
+        
         # --------------------------------TRAINING PART--------------------------------
         print("inicio do treio")
         df = pd.read_csv('./../Data/{}.csv'.format(data_name))
@@ -92,9 +109,9 @@ class Predict:
         # print(len(close_test))
 
         # Using TimeseriesGenerator to get the time series
-        train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
-        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
-        test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=128)
+        train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=batch_size)
+        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=batch_size)
+        test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=batch_size)
 
         # train_generator_array = np.array(train_generator)
         # test_generator_arraytest_generator_array = np.array(test_generator)
@@ -105,7 +122,7 @@ class Predict:
         if(switch_key[0] == True):
             model = Sequential()
             model.add(
-                LSTM(10,
+                LSTM(neurons,
                      # activation = 'SineReLU',
                      activation='relu',
                      input_shape=(look_back, 1))
@@ -121,15 +138,20 @@ class Predict:
             history_dict = history.history
             # Save it under the form of a json file
             json.dump(history_dict,
-                      open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'w'))
+                      open("./../Models/{}/json/history-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.json".format(data_name, data_name,
+                                                                                  epochs_num, look_back, batch_size, neurons), 'w'))
             # Save model
             # serialize model to JSON
             model_json = model.to_json()
-            with open("./../Models/{}/json/regressor-{}-{}.json".format(data_name, data_name, epochs_num),
-                      "w") as json_file:
+            with open("./../Models/{}/json/regressor-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.json".format(data_name, data_name,
+                                                                               epochs_num, look_back, batch_size, neurons),
+                  "w") as json_file:
                 json_file.write(model_json)
             # serialize weights to HDF5
-            model.save_weights("./../Models/{}/h5/regressor-{}-{}.h5".format(data_name, data_name, epochs_num))
+            model.save_weights(
+            "./../Models/{}/h5/regressor-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.h5".format(data_name, data_name, epochs_num,
+                                                                     look_back, batch_size, neurons))
+
             print("Saved model to disk")
 
 
@@ -137,12 +159,14 @@ class Predict:
         if (switch_key[1] == True):
             print("inicio do teste")
             # Load model
-            json_file = open("./../Models/{}/json/regressor-{}-{}.json".format(data_name, data_name, epochs_num), 'r')
+            json_file = open("./../Models/{}/json/regressor-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.json".format(data_name, data_name,
+                                                                               epochs_num, look_back, batch_size, neurons), 'r')
             loaded_model_json = json_file.read()
             json_file.close()
             model = model_from_json(loaded_model_json)
             # load weights into new model
-            model.load_weights("./../Models/{}/h5/regressor-{}-{}.h5".format(data_name, data_name, epochs_num))
+            model.load_weights("./../Models/{}/h5/regressor-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.h5".format(data_name, data_name, epochs_num,
+                                                                     look_back, batch_size, neurons))
             print("Loaded model from disk")
             # --------------------------------PREDICTION--------------------------------
 
@@ -190,90 +214,92 @@ class Predict:
             print(len(test_array))
             print(len(prediction))
 
+            loss_rmse = mean_squared_error(history_dict['loss'], history_dict['val_loss'], squared=False)
             rmse = mean_squared_error(test_array, prediction, squared=False)
-            results ="Data: {}, Epochs: {}, Look Back: {}, rmse: {}".format(data_name, epochs_num, look_back, rmse)
-            with open('./../Models/{}/results.txt'.format(data_name), 'a') as result_manager:
+            results = "Data: {}, Epochs: {}, Look Back: {}, Batch Size: {}, Neurons: {}, rmse: {}, Loss_rmse: {}".format(data_name, epochs_num,
+                                                                                        look_back, batch_size, neurons, rmse, loss_rmse)
+            with open('./../Models/{}/results2.txt'.format(data_name), 'a') as result_manager:
                 result_manager.write(results+'\n')
 
-            trace1 = go.Scatter(
-                x=date_train,
-                y=close_train,
-                mode='lines',
-                name='Data'
-            )
-            trace2 = go.Scatter(
-                x=date_test,
-                y=prediction,
-                mode='lines',
-                name='Prediction'
-            )
-            trace3 = go.Scatter(
-                x=date_test,
-                y=close_test,
-                mode='lines',
-                name='Ground Truth'
-            )
-            trace4 = go.Scatter(
-                x=forecast_dates,
-                y=forecast,
-                mode='lines',
-                name='Forecast'
-            )
-            layout = go.Layout(
-                title="{} - epochs: {} Stock - RMSE: {} - L.Back: {}".format(data_name, epochs_num, rmse, look_back),
-                xaxis={'title': "Date"},
-                yaxis={'title': "Close"}
-            )
-
-            fig = go.Figure(data=[trace1, trace2, trace3, trace4], layout=layout)
-
-
-            # fig.show()
-
-            print("Loaded figure 1")
-            # --------------------------------LOSS------------------------------------
-            history = json.load(open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'r'))
-
-            epochs_array = []
-            for i in range(epochs_num):
-                epochs_array.append(i)
-
-            # fig2 = make_subplots(rows=1, cols=2)
-            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['loss']), row=1, col=1)
-            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_loss']), row=1, col=1)
-            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['accuracy']), row=1, col=2)
-            # fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_accuracy']), row=1, col=2)
-
-            traceL = go.Scatter(
-                x=epochs_array,
-                y=history['loss'],
-                mode='lines',
-                name='Predicted Loss'
-            )
-            traceL2 = go.Scatter(
-                x=epochs_array,
-                y=history['val_loss'],
-                mode='lines',
-                name='Real Loss'
-            )
-            layoutL = go.Layout(
-                title="{} - epochs: {} Stock - RMSE: {}".format(data_name, epochs_num, rmse),
-                xaxis={'title': "Date"},
-                yaxis={'title': "Close"}
-            )
-            fig2 = go.Figure(data=[traceL, traceL2], layout=layoutL)
-
-            app = dash.Dash()
-            app.layout = html.Div([
-                dcc.Graph(figure=fig),
-                dcc.Graph(figure=fig2)
-            ])
-
-            app.run_server(debug=True, use_reloader=False)
-
+            # trace1 = go.Scatter(
+            #     x=date_train,
+            #     y=close_train,
+            #     mode='lines',
+            #     name='Data'
+            # )
+            # trace2 = go.Scatter(
+            #     x=date_test,
+            #     y=prediction,
+            #     mode='lines',
+            #     name='Prediction'
+            # )
+            # trace3 = go.Scatter(
+            #     x=date_test,
+            #     y=close_test,
+            #     mode='lines',
+            #     name='Ground Truth'
+            # )
+            # trace4 = go.Scatter(
+            #     x=forecast_dates,
+            #     y=forecast,
+            #     mode='lines',
+            #     name='Forecast'
+            # )
+            # layout = go.Layout(
+            #     title="Data: {}, Epochs: {}, Look Back: {}, Batch Size: {}, Neurons: {}, rmse: {}".format(data_name, epochs_num, look_back, batch_size, neurons, rmse),
+            #     xaxis={'title': "Date"},
+            #     yaxis={'title': "Close"}
+            # )
             #
-            # fig2.show()
-            print("Loaded figure 2")
+            # fig = go.Figure(data=[trace1, trace2, trace3, trace4], layout=layout)
+            #
+            #
+            # # fig.show()
+            #
+            # print("Loaded figure 1")
+            # # --------------------------------LOSS------------------------------------
+            # history = json.load(open("./../Models/{}/json/history-{}-{}.json".format(data_name, data_name, epochs_num), 'r'))
+            #
+            # epochs_array = []
+            # for i in range(epochs_num):
+            #     epochs_array.append(i)
+            #
+            # # fig2 = make_subplots(rows=1, cols=2)
+            # # fig2.add_trace(go.Scatter(x=epochs_array, y=history['loss']), row=1, col=1)
+            # # fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_loss']), row=1, col=1)
+            # # fig2.add_trace(go.Scatter(x=epochs_array, y=history['accuracy']), row=1, col=2)
+            # # fig2.add_trace(go.Scatter(x=epochs_array, y=history['val_accuracy']), row=1, col=2)
+            #
+            # traceL = go.Scatter(
+            #     x=epochs_array,
+            #     y=history['loss'],
+            #     mode='lines',
+            #     name='Predicted Loss'
+            # )
+            # traceL2 = go.Scatter(
+            #     x=epochs_array,
+            #     y=history['val_loss'],
+            #     mode='lines',
+            #     name='Real Loss'
+            # )
+            # layoutL = go.Layout(
+            #     title="{} - epochs: {} Stock - RMSE: {}".format(data_name, epochs_num, rmse),
+            #     xaxis={'title': "Date"},
+            #     yaxis={'title': "Close"}
+            # )
+            # fig2 = go.Figure(data=[traceL, traceL2], layout=layoutL)
+            #
+            # app = dash.Dash()
+            # app.layout = html.Div([
+            #     dcc.Graph(figure=fig),
+            #     dcc.Graph(figure=fig2)
+            # ])
+            #
+            # app.run_server(debug=True, use_reloader=False)
+            #
+            # #
+            # # fig2.show()
+            # print("Loaded figure 2")
 
 start = Predict()
 
