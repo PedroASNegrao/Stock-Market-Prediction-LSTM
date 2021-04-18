@@ -21,7 +21,9 @@ class Predict:
         # data_name = "XOM"
         data_name = "PETR4_SA_1"
         look_back = 15
-        epochs_num = 1
+        epochs_num = 50
+        batch_size =32
+        neurons = 20
         data_path = "/content/Stock-Market-Prediction-LSTM/Data"
         result_path = "/content/drive/MyDrive/Neural_Network"
 
@@ -32,18 +34,21 @@ class Predict:
         inicio = time.time()
 
         # test/train just one time
-        self.NewMethod(epochs_num, data_name, look_back, result_path, data_path)
+        self.NewMethod(epochs_num, data_name, look_back, result_path, data_path, batch_size, neurons)
 
         # # test/train an array
-        # epochs_arrays = [10, 15, 20, 25, 30, 35, 40, 45, 50, 100, 200, 300, 400, 500]
+        # epochs_arrays = [50, 100, 200, 300, 400, 500]
+        # look_back_array = [5, 10, 15, 20, 25]
+        # batch_size_array = [1, 2, 4, 8, 16]
+
         # for ep in epochs_arrays:
-        #     self.NewMethod(ep, data_name, look_back, result_path, data_path)
+        #     self.NewMethod(ep, data_name, look_back, result_path, data_path, batch_size, neurons)
 
         fim = time.time()
         tempo_total = (fim - inicio) / 60
         print("Tempo de execução foi de: %d minutos" % tempo_total)
 
-    def NewMethod(self, epochs_num, data_name, look_back, result_path, data_path):
+    def NewMethod(self, epochs_num, data_name, look_back, result_path, data_path, batch_size, neurons):
         # --------------------------------TRAINING PART--------------------------------
         print("inicio do treio")
         df = pd.read_csv('{}/{}.csv'.format(data_path, data_name))
@@ -84,9 +89,9 @@ class Predict:
         # print(len(close_test))
 
         # Using TimeseriesGenerator to get the time series
-        train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
-        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=128)
-        test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=128)
+        train_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=batch_size)
+        valid_data_generator = TimeseriesGenerator(close_train, close_train, length=look_back, batch_size=batch_size)
+        test_generator = TimeseriesGenerator(close_test, close_test, length=look_back, batch_size=batch_size)
 
         # train_generator_array = np.array(train_generator)
         # test_generator_arraytest_generator_array = np.array(test_generator)
@@ -96,7 +101,7 @@ class Predict:
         # --------------------------------NEURAL NETWORK--------------------------------
         model = Sequential()
         model.add(
-            LSTM(10,
+            LSTM(neurons,
                  # activation = 'SineReLU',
                  activation='relu',
                  input_shape=(look_back, 1))
@@ -112,19 +117,19 @@ class Predict:
         history_dict = history.history
         # Save it under the form of a json file
         json.dump(history_dict,
-                  open("{}/{}/json/history-{}-epochs-{}-loockback-{}.json".format(result_path, data_name, data_name,
-                                                                                  epochs_num, look_back), 'w'))
+                  open("{}/{}/json/history-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.json".format(result_path, data_name, data_name,
+                                                                                  epochs_num, look_back, batch_size, neurons), 'w'))
         # Save model
         # serialize model to JSON
         model_json = model.to_json()
-        with open("{}/{}/json/regressor-{}-epochs-{}-loockback-{}.json".format(result_path, data_name, data_name,
-                                                                               epochs_num, look_back),
+        with open("{}/{}/json/regressor-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.json".format(result_path, data_name, data_name,
+                                                                               epochs_num, look_back, batch_size, neurons),
                   "w") as json_file:
             json_file.write(model_json)
         # serialize weights to HDF5
         model.save_weights(
-            "{}/{}/h5/regressor-{}-epochs-{}-loockback-{}.h5".format(result_path, data_name, data_name, epochs_num,
-                                                                     look_back))
+            "{}/{}/h5/regressor-{}-epochs-{}-loockback-{}-batch_size-{}-neurons-{}.h5".format(result_path, data_name, data_name, epochs_num,
+                                                                     look_back, batch_size, neurons))
         print("Saved model to disk")
 
         print("inicio do teste")
@@ -150,7 +155,7 @@ class Predict:
         # plt.legend(['prediction', 'real'], loc='upper left')
         plt.legend(['prediction', 'real'])
         plt.ylabel('Stock-prices')
-        plt.title("Data: {}, Epochs: {}, Look Back: {}, rmse: {}".format(data_name, epochs_num, look_back, rmse))
+        plt.title("Data: {}, Epochs: {}, Look Back: {}, Batch Size: {}, Neurons: {}, rmse: {}".format(data_name, epochs_num, look_back, batch_size, neurons, rmse))
         plt.show()
 
         # summarize history for loss
@@ -164,8 +169,8 @@ class Predict:
 
         # Results.txt
 
-        results = "Data: {}, Epochs: {}, Look Back: {}, rmse: {}, Loss_rmse: {}".format(data_name, epochs_num,
-                                                                                        look_back, rmse, loss_rmse)
+        results = "Data: {}, Epochs: {}, Look Back: {}, Batch Size: {}, Neurons: {}, rmse: {}, Loss_rmse: {}".format(data_name, epochs_num,
+                                                                                        look_back, batch_size, neurons, rmse, loss_rmse)
         with open('{}/{}/results.txt'.format(result_path, data_name), 'a') as result_manager:
             result_manager.write(results + '\n')
 
