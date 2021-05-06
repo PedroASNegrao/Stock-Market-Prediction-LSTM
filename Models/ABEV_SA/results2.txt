@@ -1,0 +1,7 @@
+Data: ABEV_SA, Epochs: 1, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 1.4377771190938753, Loss_rmse: 5.8622439950704575
+Data: ABEV_SA, Epochs: 1, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 14.927034866841993, Loss_rmse: 54.7645263671875
+Data: ABEV_SA, Epochs: 1, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 1.2571676031846741, Loss_rmse: 3.5396668612957
+Data: ABEV_SA, Epochs: 25, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.9640281192107212, Loss_rmse: 9.74733417455018
+Data: ABEV_SA, Epochs: 50, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.9927966902909425, Loss_rmse: 10.56957960766952
+Data: ABEV_SA, Epochs: 100, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 1.0793074861537353, Loss_rmse: 5.225114484744921
+Data: ABEV_SA, Epochs: 200, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 1.0149040627694907, Loss_rmse: 3.7463850189229606

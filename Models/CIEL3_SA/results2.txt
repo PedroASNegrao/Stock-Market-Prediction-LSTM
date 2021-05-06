@@ -1,0 +1,15 @@
+Data: CIEL3_SA, Epochs: 1, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 1.413977171066936, Loss_rmse: 143.9777992963791
+Data: CIEL3_SA, Epochs: 25, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.6315473084682101, Loss_rmse: 23.98615706773235
+Data: CIEL3_SA, Epochs: 50, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.697988008354681, Loss_rmse: 25.04986537527148
+Data: CIEL3_SA, Epochs: 100, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.6906161675997716, Loss_rmse: 1.1873300923606123
+Data: CIEL3_SA, Epochs: 200, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.7137592174938937, Loss_rmse: 15.01557497646213
+Data: CIEL3_SA, Epochs: 1, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 1.0129263765265322, Loss_rmse: 177.87661743164062
+Data: CIEL3_SA, Epochs: 25, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 0.6853067548546148, Loss_rmse: 41.98729723692852
+Data: CIEL3_SA, Epochs: 50, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 0.7144714040134171, Loss_rmse: 36.17167640840281
+Data: CIEL3_SA, Epochs: 100, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 0.946644021150095, Loss_rmse: 14.842292699394878
+Data: CIEL3_SA, Epochs: 200, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 0.668878643088387, Loss_rmse: 11.429088122497845
+Data: CIEL3_SA, Epochs: 1, Look Back: 15, Batch Size: 128, Neurons: 20, rmse: 6.382619953533511, Loss_rmse: 67.916015625
+Data: CIEL3_SA, Epochs: 25, Look Back: 15, Batch Size: 128, Neurons: 20, rmse: 1.0890703216576452, Loss_rmse: 25.95974669473497
+Data: CIEL3_SA, Epochs: 50, Look Back: 15, Batch Size: 128, Neurons: 20, rmse: 0.8835110760332283, Loss_rmse: 14.220836604855261
+Data: CIEL3_SA, Epochs: 100, Look Back: 15, Batch Size: 128, Neurons: 20, rmse: 0.6514008350522905, Loss_rmse: 14.143892216324774
+Data: CIEL3_SA, Epochs: 200, Look Back: 15, Batch Size: 128, Neurons: 20, rmse: 0.6858399658115105, Loss_rmse: 3.8765350167229924

@@ -1,0 +1,9 @@
+Data: ITSA4_SA, Epochs: 1, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.6953600840564671, Loss_rmse: 4.916963338851929
+Data: ITSA4_SA, Epochs: 25, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.8239713992250358, Loss_rmse: 1.4091177340744363
+Data: ITSA4_SA, Epochs: 50, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.9102527038227847, Loss_rmse: 0.3529212202452969
+Data: ITSA4_SA, Epochs: 100, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.8065509606428855, Loss_rmse: 0.43687012662228947
+Data: ITSA4_SA, Epochs: 200, Look Back: 15, Batch Size: 32, Neurons: 20, rmse: 0.7574498646765088, Loss_rmse: 0.3144690954608313
+Data: ITSA4_SA, Epochs: 1, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 8.141567693865557, Loss_rmse: 7.645707845687866
+Data: ITSA4_SA, Epochs: 25, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 0.9631171592745966, Loss_rmse: 0.12500094764940253
+Data: ITSA4_SA, Epochs: 50, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 0.8583145092906292, Loss_rmse: 2.3095133854655416
+Data: ITSA4_SA, Epochs: 100, Look Back: 15, Batch Size: 64, Neurons: 20, rmse: 1.4332548084486736, Loss_rmse: 0.6434841642175592

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import math
 
-csv_file = './../Data/PETR4_SA_1.csv'
+csv_file = './../../Data/ITSA4_SA.csv'
 
 data = pd.read_csv(csv_file)
 

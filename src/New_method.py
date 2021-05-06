@@ -26,32 +26,33 @@ class Predict:
         inicio = time.time()
 
         # data_name = "XOM"
-        data_name = "PETR4_SA_1"
+        # data_name = "PETR4_SA_1"
         # look_back = 15
         # epochs_num = 50
-        # batch_size =32
+        # batch_size = 32
         # neurons = 20
-        # # switch_key = [False, False]  # [train, test]
+        # switch_key = [False, False]  # [train, test]
         # switch_key = [True, True]  # [train, test]
-        # # switch_key = [True, False]  # [train, test]
-        # # switch_key = [True, True] #[train, test]
+        # switch_key = [True, False]  # [train, test]
+        # switch_key = [True, True] #[train, test]
 
-        # # test/train just one time
+        # test/train just one time
         # self.NewMethod(epochs_num, data_name, look_back, result_path, batch_size, neurons)
 
         
         #test/train an array
-        switch_key = [True, False]
-        look_back_array = [5, 15, 30]
-        neurons_array = [5, 10, 20, 30, 40]
-        epochs_array = [50, 100, 200, 300, 400, 500]
-        batch_size_array = [8, 16, 32, 64, 128]
+        switch_key = [True, True]
+        # data_name_array = ["ABEV_SA", "CIEL3_SA", "ITSA4_SA"]
+        data_name_array = ["CIEL3_SA", "ITSA4_SA"]
+        look_back = 15
+        neurons = 20
+        epochs_array = [1, 25, 50, 100, 200]
+        batch_size_array = [32, 64, 128]
 
-        for batch_size in batch_size_array:
-            for neurons in neurons_array:
-                for epochs_num in epochs_array:
-                    for look_back in look_back_array:
-                        self.NewMethod(epochs_num, data_name, look_back, switch_key, batch_size, neurons)
+        for data_name in data_name_array:
+            for batch_size in batch_size_array:
+                    for epochs_num in epochs_array:
+                            self.NewMethod(epochs_num, data_name, look_back, switch_key, batch_size, neurons)
 
         
         # epochs_arrays = [20, 30, 50, 100, 200, 300, 400, 500]
@@ -78,16 +79,6 @@ class Predict:
         df['Date'] = pd.to_datetime(df['Date'])
         df.set_axis(df['Date'], inplace=True)
         df.drop(columns=['Open', 'High', 'Low', 'Volume'], inplace=True)
-
-        """
-        #Plot close value
-        df['Close'].plot(figsize=(16, 6), label='GOOG Close')
-        plt.title("Test")
-        plt.xlabel('Time')
-        plt.ylabel('GOOG Stock Price')
-        plt.legend()
-        plt.show()
-        """
 
         # --------------------------------DATA PROCESSING--------------------------------
 
@@ -176,6 +167,8 @@ class Predict:
             close_test = close_test.reshape((-1))
             prediction = prediction.reshape((-1))
 
+            print(close_test)
+            print(prediction)
 
         # --------------------------------FORECASTING--------------------------------
             num_prediction = 30
@@ -202,8 +195,8 @@ class Predict:
             close_data = close_data.reshape((-1))
 
             # --------------------------------PLOTING------------------------------------
-            print(close_test)
-            print(prediction)
+
+
             # rmse = "TEST"
 
             test_array = []
